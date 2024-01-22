@@ -20,8 +20,9 @@ resource "google_compute_instance" "instance-1" {
   }
 
   metadata = {
-    enable-windows-ssh         = "TRUE"
-    windows-startup-script-url = "https://storage.googleapis.com/ac-devops-chg-01-2024/startup.ps1"
+    sysprep-specialize-script-cmd = "googet -noconfirm=true install google-compute-engine-ssh"
+    enable-windows-ssh            = "TRUE"
+    windows-startup-script-url    = "https://storage.googleapis.com/ac-devops-chg-01-2024/startup.ps1"
   }
 
   scheduling {
@@ -68,3 +69,20 @@ resource "google_storage_bucket_object" "object" {
   bucket = google_storage_bucket.bucket.name
 }
 
+# Create RSA key of size 4096 bits for compute engine instance
+resource "tls_private_key" "key-pair" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Save private key to a file
+resource "local_file" "private_key_file" {
+  content  = tls_private_key.key-pair.private_key_openssh
+  filename = "ac_challenge_key.pem"
+}
+
+# Save private key to a file
+resource "local_file" "public_key_file" {
+  content  = tls_private_key.key-pair.public_key_openssh
+  filename = "ac_challenge_key.pub"
+}
