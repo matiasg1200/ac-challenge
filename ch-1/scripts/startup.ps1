@@ -6,8 +6,5 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 choco install git.install -y
 choco install nodejs.install -y
 choco install office365business -y
+choco install vscode -y
 choco install openjdk -y
-
-# Enable Windows SSH
-googet -noconfirm=true update google-compute-engine-windows 
-googet -noconfirm=true install google-compute-engine-ssh
