@@ -17,7 +17,7 @@ resource "google_cloudbuild_trigger" "trigger" {
   filename = "cloudbuild.yaml"
 
   trigger_template {
-    branch_name = "main"
+    branch_name = "*"
     repo_name   = google_sourcerepo_repository.source-repo.name
   }
 
