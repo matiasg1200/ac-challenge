@@ -8,5 +8,5 @@ terraform {
 }
 
 provider "google" {
-  project = "terraform-with-gcp-401622"
+  project = var.project_id
 }
