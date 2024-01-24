@@ -1,12 +1,12 @@
 resource "google_sourcerepo_repository" "source-repo" {
-  name = "GCP_CloudBuild_Exercises"
+  name    = "GCP_CloudBuild_Exercises"
   project = var.project_id
 }
 
 resource "google_cloudbuild_trigger" "trigger_create-image" {
 
-  name        = "create-image"
-  location = "us-central1"
+  name     = "create-image"
+  location = "global"
   filename = "cloudbuild-image.yaml"
 
   source_to_build {
@@ -15,13 +15,13 @@ resource "google_cloudbuild_trigger" "trigger_create-image" {
     repo_type = "CLOUD_SOURCE_REPOSITORIES"
   }
 
-  depends_on = [ google_sourcerepo_repository.source-repo ]
+  depends_on = [google_sourcerepo_repository.source-repo]
 }
 
 resource "google_cloudbuild_trigger" "trigger_cicd-sample-app" {
 
-  name        = "cicd-sample-app"
-  location = "us-central1"
+  name     = "cicd-sample-app"
+  location = "global"
   filename = "cloudbuild-cicd.yaml"
 
   trigger_template {
