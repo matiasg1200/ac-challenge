@@ -1,23 +1,31 @@
 resource "google_sourcerepo_repository" "source-repo" {
-  name = "source-devops-repo"
+  name = "GCP_CloudBuild_Exercises"
+  project = var.project_id
 }
 
-resource "google_artifact_registry_repository" "artifcat-repo" {
-  location      = "us-central1"
-  repository_id = "artifact-devops-repo"
-  format        = "DOCKER"
+resource "google_cloudbuild_trigger" "trigger_create-image" {
 
-  docker_config {
-    immutable_tags = true
-  }
-}
-
-resource "google_cloudbuild_trigger" "trigger" {
+  name        = "create-image"
   location = "us-central1"
-  filename = "cloudbuild.yaml"
+  filename = "cloudbuild-image.yaml"
+
+  source_to_build {
+    uri       = "https://source.developers.google.com/p/${var.project_id}/r/GCP_CloudBuild_Exercises"
+    ref       = "refs/heads/master"
+    repo_type = "CLOUD_SOURCE_REPOSITORIES"
+  }
+
+  depends_on = [ google_sourcerepo_repository.source-repo ]
+}
+
+resource "google_cloudbuild_trigger" "trigger_cicd-sample-app" {
+
+  name        = "cicd-sample-app"
+  location = "us-central1"
+  filename = "cloudbuild-cicd.yaml"
 
   trigger_template {
-    branch_name = "*"
+    branch_name = ".*"
     repo_name   = google_sourcerepo_repository.source-repo.name
   }
 
