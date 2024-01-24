@@ -1,0 +1,13 @@
+steps:
+  # Stop instance
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args: ['gcloud', 'compute', 'instances', 'stop', '${_INSTANCE_NAME}', '--zone=${_ZONE}' ]
+  # Create image from instance
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args: ['gcloud', 'compute', 'images', 'create', '${_IMAGE_NAME}', '--source-disk=${_SOURCE_DISK}', '--source-disk-zone=${_ZONE}' ]
+  # Start stopped instance
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args: ['gcloud', 'compute', 'instances', 'start', '${_INSTANCE_NAME}', '--zone=${_ZONE}' ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY

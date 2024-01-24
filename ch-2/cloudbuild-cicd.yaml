@@ -1,0 +1,46 @@
+steps:
+
+# Run unit test 
+- name: 'python:3.7-slim'
+  id: Test
+  entrypoint: /bin/sh
+  dir: sample-app
+  args:
+  - -c
+  - 'pip install flask && python test.py -v'
+
+# Build image
+- name: 'gcr.io/cloud-builders/docker'
+  id: Build
+  dir: sample-app
+  args:
+  - 'build'
+  - '-t'
+  - 'gcr.io/$PROJECT_ID/my-repository/sample-app:$SHORT_SHA'
+  - '.'
+
+# Push image to gcr 
+- name: 'gcr.io/cloud-builders/docker'
+  id: Push
+  dir: sample-app
+  args:
+  - 'push'
+  - 'gcr.io/$PROJECT_ID/my-repository/sample-app:$SHORT_SHA'
+  
+# Deploy to cloud run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  id: Deploy to CloudRun
+  entrypoint: gcloud
+  args: 
+  - 'run' 
+  - 'deploy'
+  - 'sample-app'
+  - '--image'
+  - 'gcr.io/$PROJECT_ID/sample-repository/sample-app:$SHORT_SHA'
+  - '--region'
+  - '${_REGION}'
+  - '--allow-unauthenticated'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
