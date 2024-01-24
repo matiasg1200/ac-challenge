@@ -86,3 +86,19 @@ resource "local_file" "public_key_file" {
   content  = tls_private_key.key-pair.public_key_openssh
   filename = "ac_challenge_key.pub"
 }
+
+# Create Storage Bucket to store keys
+resource "google_storage_bucket" "bucket-keys" {
+  name     = "ac-devops-chg-01-2024-keys"
+  location = "US"
+}
+
+# Upload script to Storage Bucket
+resource "google_storage_object_access_control" "object_rule" {
+  object = google_storage_bucket_object.object.output_name
+  bucket = google_storage_bucket.bucket.name
+  role   = "READER"
+  entity = "allUsers"
+  depends_on = [ local_file.public_key_file ]
+}
+
