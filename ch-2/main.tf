@@ -1,3 +1,16 @@
+# Create Service Account and assign permissions to deploy
+resource "google_service_account" "cloudbuild_service_account" {
+  account_id = "cloudbuild-sa"
+}
+
+resource "google_project_iam_member" "role_binding" {
+  for_each = var.iam_roles
+  project = data.google_project.project.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+# Create Cloud Source repository
 resource "google_sourcerepo_repository" "source-repo" {
   name    = "GCP_CloudBuild_Exercises"
   project = var.project_id
