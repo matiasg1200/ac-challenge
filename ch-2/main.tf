@@ -5,9 +5,9 @@ resource "google_service_account" "cloudbuild_service_account" {
 
 resource "google_project_iam_member" "role_binding" {
   for_each = var.iam_roles
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+  project  = var.project_id
+  role     = each.value
+  member   = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
 # Create Cloud Source repository
@@ -33,9 +33,10 @@ resource "google_cloudbuild_trigger" "trigger_create-image" {
 
 resource "google_cloudbuild_trigger" "trigger_cicd-sample-app" {
 
-  name     = "cicd-sample-app"
-  location = "global"
-  filename = "cloudbuild-cicd.yaml"
+  name            = "cicd-sample-app"
+  location        = "global"
+  filename        = "cloudbuild-cicd.yaml"
+  service_account = google_service_account.cloudbuild_service_account.id
 
   trigger_template {
     branch_name = ".*"
