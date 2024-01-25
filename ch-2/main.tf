@@ -5,7 +5,7 @@ resource "google_service_account" "cloudbuild_service_account" {
 
 resource "google_project_iam_member" "role_binding" {
   for_each = var.iam_roles
-  project = data.google_project.project.project_id
+  project = var.project_id
   role    = each.value
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
