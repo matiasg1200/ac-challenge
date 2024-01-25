@@ -24,7 +24,7 @@ cd ~
 
 git clone https://source.developers.google.com/p/<your_gcp_project>/r/GCP_CloudBuild_Exercises
 
-cp -r $repo/* prueba/
+cp -r $repo/* GCP_CloudBuild_Exercises/
 
 cd GCP_CloudBuild_Exercises
 
@@ -35,7 +35,7 @@ git push -u origin master
 
 You can also follow these instructions to make your first commit: https://source.cloud.google.com/neon-alcove-412113/GCP_CloudBuild_Exercises?hl=en
 
-copy only the files under the directory ch-2 to the new repo
+> copy only the files under the directory ch-2 to the new repo
 
 ### CICD Workflow
 
