@@ -1,0 +1,19 @@
+steps:
+
+# Clone repos
+- name: 'gcr.io/cloud-builders/git'
+  id: Clone repos
+  entrypoint: 'bash'
+  args:
+  - -c
+  - |
+  - git clone https://source.developers.google.com/p/neon-alcove-412113/r/GCP_CloudBuild_Exercises &&
+  - git clone https://github.com/matiasg1200/ac-challenge.git &&
+  - cp -r ac-challenge/ch-2/* GCP_CloudBuild_Exercises &&
+  - cd GCP_CloudBuild_Exercises &&
+  - git add . &&
+  - git commit -m "initial commit" &&
+  - git push -u origin master
+
+options:
+  logging: CLOUD_LOGGING_ONLY
