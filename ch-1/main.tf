@@ -44,26 +44,26 @@ resource "google_compute_instance" "instance-1" {
 }
 
 # Create public access Storage Bucket for startup script 
-resource "google_storage_bucket_access_control" "bucket_rule" {
+resource "google_storage_bucket_access_control" "bucket_rule-script" {
   bucket = google_storage_bucket.bucket.name
   role   = "READER"
   entity = "allUsers"
 }
 
-resource "google_storage_bucket" "bucket" {
+resource "google_storage_bucket" "bucket-script" {
   name     = "ac-devops-chg-01-2024"
   location = "US"
 }
 
 # Upload script to Storage Bucket
-resource "google_storage_object_access_control" "object_rule" {
+resource "google_storage_object_access_control" "object_rule-script" {
   object = google_storage_bucket_object.object.output_name
   bucket = google_storage_bucket.bucket.name
   role   = "READER"
   entity = "allUsers"
 }
 
-resource "google_storage_bucket_object" "object" {
+resource "google_storage_bucket_object" "object-script" {
   name   = "startup.ps1"
   source = "./scripts/startup.ps1"
   bucket = google_storage_bucket.bucket.name
@@ -81,24 +81,37 @@ resource "local_file" "private_key_file" {
   filename = "ac_challenge_key.pem"
 }
 
-# Save private key to a file
+# Save public key to a file
 resource "local_file" "public_key_file" {
   content  = tls_private_key.key-pair.public_key_openssh
   filename = "ac_challenge_key.pub"
+  
+  # update the public key to add a username (required by GCP)
+  provisioner "local-exec" {
+    command = "truncate -s 724 ac_challenge_key.pub && sed -i '1s/^/challenge:/' ac_challenge_key.pub"
+  }
 }
-
 # Create Storage Bucket to store keys
 resource "google_storage_bucket" "bucket-keys" {
   name     = "ac-devops-chg-01-2024-keys"
   location = "US"
 }
 
-# Upload script to Storage Bucket
-resource "google_storage_object_access_control" "object_rule" {
-  object = google_storage_bucket_object.object.output_name
-  bucket = google_storage_bucket.bucket.name
-  role   = "READER"
-  entity = "allUsers"
-  depends_on = [ local_file.public_key_file ]
+# Upload private key to Storage Bucket
+resource "google_storage_bucket_object" "object-script" {
+  name   = "ac_challenge_key.pem"
+  source = "./ac_challenge_key.pem"
+  bucket = google_storage_bucket.bucket-keys
+  depends_on = [ local_file.private_key_file ]
 }
 
+module "gcloud" {
+  source  = "terraform-google-modules/gcloud/google"
+
+  create_cmd_entrypoint  = "gcloud"
+  create_cmd_body        = "compute instances add-metadata ${google_compute_instance.instance-1.name} --metadata-from-file ssh-keys=ac_challenge_key.pub --zone us-central1-a"
+  destroy_cmd_entrypoint = "gcloud"
+  destroy_cmd_body       = "compute instances add-metadata my-vm --metadata-from-file ssh-keys=ac_challenge_key.pub --zone us-central1-a"
+  module_depends_on = [ google_compute_instance.instance-1 ]
+
+}
