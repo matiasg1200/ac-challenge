@@ -5,3 +5,5 @@ iam_roles = {
   "cloud_run"   = "roles/run.admin"
   "write_logs"  = "roles/logging.logWriter"
 }
+
+project_id = ""
