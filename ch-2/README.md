@@ -6,6 +6,7 @@ run the terraform code to create the following resoruces
 - Cloud Source repository
 - Cloud Build trigger to create image from compute instances
 - Cloud Build trigger for cicd pipepiline to deploy sample Python application to Cloud Run
+- Service Account with the necessary permissions to execute the triggers  
 
 ### Kickoff CICD Pipelines 
 
@@ -39,7 +40,7 @@ You can also follow these instructions to make your first commit: https://source
 
 ### CICD Workflow
 
-Once you've made your first push that should trigger a build from the `cicd-sample-app` trigger. This will run the following steps:
+Your first push to the the newly created Cloud Source Repository should trigger a build from the `cicd-sample-app` trigger. This will run the following steps:
 - Run a unit test 
 - After succeful test build a new image
 - Push the image to GCR
