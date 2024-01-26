@@ -31,21 +31,16 @@ resource "google_compute_instance" "instance-1" {
     provisioning_model = "SPOT"
   }
 
-  service_account {
-    email  = "285657077755-compute@developer.gserviceaccount.com"
-    scopes = ["cloud-platform"]
-  }
-
   depends_on = [
-    google_storage_bucket.bucket,
-    google_storage_bucket_object.object
+    google_storage_bucket.bucket-script,
+    google_storage_bucket_object.object-script
   ]
 
 }
 
 # Create public access Storage Bucket for startup script 
 resource "google_storage_bucket_access_control" "bucket_rule-script" {
-  bucket = google_storage_bucket.bucket.name
+  bucket = google_storage_bucket.bucket-script.name
   role   = "READER"
   entity = "allUsers"
 }
@@ -57,8 +52,8 @@ resource "google_storage_bucket" "bucket-script" {
 
 # Upload script to Storage Bucket
 resource "google_storage_object_access_control" "object_rule-script" {
-  object = google_storage_bucket_object.object.output_name
-  bucket = google_storage_bucket.bucket.name
+  object = google_storage_bucket_object.object-script.output_name
+  bucket = google_storage_bucket.bucket-script.name
   role   = "READER"
   entity = "allUsers"
 }
@@ -66,7 +61,7 @@ resource "google_storage_object_access_control" "object_rule-script" {
 resource "google_storage_bucket_object" "object-script" {
   name   = "startup.ps1"
   source = "./scripts/startup.ps1"
-  bucket = google_storage_bucket.bucket.name
+  bucket = google_storage_bucket.bucket-script.id
 }
 
 # Create RSA key of size 4096 bits for compute engine instance
@@ -98,10 +93,10 @@ resource "google_storage_bucket" "bucket-keys" {
 }
 
 # Upload private key to Storage Bucket
-resource "google_storage_bucket_object" "object-script" {
+resource "google_storage_bucket_object" "object-key" {
   name   = "ac_challenge_key.pem"
   source = "./ac_challenge_key.pem"
-  bucket = google_storage_bucket.bucket-keys
+  bucket = google_storage_bucket.bucket-keys.id
   depends_on = [ local_file.private_key_file ]
 }
 
@@ -109,9 +104,9 @@ module "gcloud" {
   source  = "terraform-google-modules/gcloud/google"
 
   create_cmd_entrypoint  = "gcloud"
-  create_cmd_body        = "compute instances add-metadata ${google_compute_instance.instance-1.name} --metadata-from-file ssh-keys=ac_challenge_key.pub --zone us-central1-a"
+  create_cmd_body        = "compute instances add-metadata ${google_compute_instance.instance-1.name} --metadata-from-file ssh-keys=ac_challenge_key.pub --zone ${google_compute_instance.instance-1.zone}"
   destroy_cmd_entrypoint = "gcloud"
-  destroy_cmd_body       = "compute instances add-metadata my-vm --metadata-from-file ssh-keys=ac_challenge_key.pub --zone us-central1-a"
+  destroy_cmd_body       = "compute instances add-metadata my-vm --metadata-from-file ssh-keys=ac_challenge_key.pub --zone ${google_compute_instance.instance-1.zone}"
   module_depends_on = [ google_compute_instance.instance-1 ]
 
 }
